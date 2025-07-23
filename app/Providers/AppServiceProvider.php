@@ -14,13 +14,18 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    /**
+        /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
         // Locale auf Deutsch setzen
         app()->setLocale('de');
+        
+        // Authorization Gates definieren
+        \Illuminate\Support\Facades\Gate::define('manage-positions', function ($user) {
+            return $user->role === 'admin';
+        });
         
         // HTTPS erzwingen für Produktion und ngrok
         if (config('app.env') !== 'local' || config('app.force_https')) {

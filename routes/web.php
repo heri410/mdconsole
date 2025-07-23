@@ -28,7 +28,7 @@ require __DIR__.'/auth.php';
 
 // Positionsverwaltung (nur für Administratoren)
 use App\Http\Controllers\PositionController;
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'can:manage-positions'])->group(function () {
     Route::resource('positions', PositionController::class);
 });
 

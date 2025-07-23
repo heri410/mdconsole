@@ -5,14 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Position;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class PositionController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $this->authorize('manage-positions');
+        
         $query = Position::with('customer');
         
         // Filter nach Kunde

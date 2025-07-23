@@ -164,6 +164,14 @@ class Customer extends Model
     }
     
     /**
+     * Get the domains for the customer.
+     */
+    public function domains()
+    {
+        return $this->hasMany(Domain::class);
+    }
+    
+    /**
      * Get unbilled positions for the customer.
      */
     public function unbilledPositions()

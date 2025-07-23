@@ -17,8 +17,12 @@ class DashboardController extends Controller
         // Rechnungen für alle Benutzer laden (Admin sieht alle, Kunden nur ihre eigenen)
         $query = Invoice::query();
 
+        // Kunden sehen nur ihre eigenen Rechnungen, Admins sehen alle
         if ($user->role === 'customer' && $user->customer_id) {
             $query->where('customer_id', $user->customer_id);
+        } elseif ($user->role === 'customer' && !$user->customer_id) {
+            // Kunde ohne customer_id sieht keine Rechnungen
+            $query->where('id', 0); // Unmögliche Bedingung = keine Ergebnisse
         }
 
         // Filter anwenden
