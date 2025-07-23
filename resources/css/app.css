@@ -1,0 +1,22 @@
+@import "../../node_modules/bootstrap/dist/css/bootstrap.min.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark Theme Styles */
+.dark-theme {
+    @apply bg-gray-900 text-gray-100;
+}
+
+/* Background Image Styles */
+.login-background {
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+/* Login Card with Glass Effect */
+.login-card {
+    @apply bg-black/80 backdrop-blur-md shadow-2xl border border-white/10 rounded-2xl;
+}
