@@ -30,7 +30,6 @@ require __DIR__.'/auth.php';
 use App\Http\Controllers\PayPalController;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/paypal/bulk/pay', [PayPalController::class, 'bulkPay'])->name('paypal.bulk.pay');
-    Route::get('/paypal/bulk/overview', [PayPalController::class, 'bulkOverview'])->name('paypal.bulk.overview');
     Route::get('/paypal/bulk/success', [PayPalController::class, 'bulkSuccess'])->name('paypal.bulk.success');
     Route::get('/paypal/bulk/cancel', [PayPalController::class, 'bulkCancel'])->name('paypal.bulk.cancel');
     

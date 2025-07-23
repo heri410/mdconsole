@@ -53,9 +53,9 @@ class PayPalController extends Controller
                 return redirect()->back()->with('error', 'PayPal-Fehler: ' . ($response['error']['message'] ?? 'Unbekannter Fehler'));
             }
             
-            // Prüfe ob Zahlungen erfolgreich erstellt wurden
-            if (!$response['success'] || empty($response['approval_urls'])) {
-                $errorMsg = 'Keine Zahlungen konnten erstellt werden.';
+            // Prüfe ob Zahlung erfolgreich erstellt wurde
+            if (!$response['success'] || empty($response['approval_url'])) {
+                $errorMsg = 'Die Zahlung konnte nicht erstellt werden.';
                 if (isset($response['payment_results'])) {
                     $errors = collect($response['payment_results'])->where('error')->pluck('error.message')->filter();
                     if ($errors->isNotEmpty()) {
@@ -65,29 +65,21 @@ class PayPalController extends Controller
                 return redirect()->back()->with('error', $errorMsg);
             }
             
-            // Bei mehreren separaten Zahlungen nehme die erste für die Weiterleitung
-            // TODO: Implementiere eine Übersichtsseite für mehrere Zahlungen
-            $firstPayment = $response['approval_urls'][0];
-            $approvalUrl = $firstPayment['approval_url'];
+            // Speichere Zahlungsinformationen in der Session
+            session([
+                'paypal_order_id' => $response['order_id'],
+                'paypal_invoices' => $invoices->pluck('id')->toArray(),
+                'paypal_total_amount' => $response['total_amount']
+            ]);
             
-            Log::info('PayPal Approval URLs:', $response['approval_urls']);
+            Log::info('PayPal Bulk Payment created:', [
+                'order_id' => $response['order_id'],
+                'total_amount' => $response['total_amount'],
+                'invoice_count' => $invoices->count()
+            ]);
 
-            if ($approvalUrl) {
-                // Speichere alle Zahlungsinformationen in der Session
-                session([
-                    'paypal_bulk_payments' => $response['approval_urls'],
-                    'paypal_invoices' => $invoices->pluck('id')->toArray()
-                ]);
-                
-                // Bei mehreren Zahlungen zeige eine Übersichtsseite
-                if (count($response['approval_urls']) > 1) {
-                    return redirect()->route('paypal.bulk.overview');
-                }
-                
-                // Bei nur einer Zahlung direkt weiterleiten
-                return redirect($approvalUrl);
-            }
-            return redirect()->back()->with('error', 'Die Zahlung konnte nicht durchgeführt werden. Bitte versuchen Sie es später erneut.');
+            // Weiterleitung zur PayPal-Genehmigungsseite
+            return redirect($response['approval_url']);
         } catch (\Exception $e) {
             Log::error('PayPal Error:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return redirect()->back()->with('error', 'Die Zahlung konnte nicht durchgeführt werden. Bitte versuchen Sie es später erneut.');
@@ -99,6 +91,7 @@ class PayPalController extends Controller
     {
         $orderId = $request->get('token');
         $invoiceIds = session('paypal_invoices', []);
+        $totalAmount = session('paypal_total_amount', 0);
         
         if (!$orderId || empty($invoiceIds)) {
             return redirect()->route('dashboard')->with('error', 'Zahlungsdaten nicht gefunden.');
@@ -121,98 +114,28 @@ class PayPalController extends Controller
                     'web_payment_status' => 'completed',
                     'web_payment_date' => now(),
                     'web_payment_id' => $orderId,
-                    'web_payment_amount' => $paidAmount
+                    'web_payment_amount' => $paidAmount ?? $totalAmount
                 ]);
 
-                session()->forget('paypal_invoices');
-                return redirect()->route('dashboard')->with('success', 'Zahlung erfolgreich! Alle Rechnungen wurden bezahlt.');
+                // Bereinige Session
+                session()->forget(['paypal_invoices', 'paypal_order_id', 'paypal_total_amount']);
+                
+                $invoiceCount = count($invoiceIds);
+                return redirect()->route('dashboard')->with('success', 
+                    "Zahlung erfolgreich! Alle {$invoiceCount} Rechnungen wurden bezahlt. Gesamtbetrag: " . number_format($totalAmount, 2, ',', '.') . ' €');
             } else {
                 return redirect()->route('dashboard')->with('error', 'Die Zahlung konnte nicht durchgeführt werden. Bitte versuchen Sie es später erneut.');
             }
         } catch (\Exception $e) {
+            Log::error('PayPal bulk payment capture error: ' . $e->getMessage());
             return redirect()->route('dashboard')->with('error', 'Die Zahlung konnte nicht durchgeführt werden. Bitte versuchen Sie es später erneut.');
         }
-    }
-
-    // Übersichtsseite für mehrere separate Zahlungen
-    public function bulkOverview()
-    {
-        $bulkPayments = session('paypal_bulk_payments', []);
-        $invoiceIds = session('paypal_invoices', []);
-        
-        if (empty($bulkPayments)) {
-            return redirect()->route('dashboard')->with('error', 'Keine Zahlungsinformationen gefunden.');
-        }
-        
-        // Lade die Rechnungsdaten
-        $invoices = Invoice::whereIn('id', $invoiceIds)->get()->keyBy('id');
-        
-        // Kombiniere Zahlungs- und Rechnungsdaten
-        $paymentData = collect($bulkPayments)->map(function ($payment) use ($invoices) {
-            $invoice = $invoices->get($payment['invoice_id']);
-            return [
-                'invoice' => $invoice,
-                'approval_url' => $payment['approval_url'],
-                'order_id' => $payment['order_id']
-            ];
-        });
-        
-        return view('paypal.bulk-overview', compact('paymentData'));
-    }
-
-    // Erfolg-Callback für einzelne Rechnung
-    public function success(Request $request, Invoice $invoice)
-    {
-        $orderId = $request->get('token');
-        
-        if (!$orderId) {
-            return redirect()->route('dashboard')->with('error', 'Zahlungsdaten nicht gefunden.');
-        }
-        
-        try {
-            // Capture die PayPal-Zahlung
-            $result = $this->paypalService->capturePayment($orderId);
-
-            if (isset($result['status']) && $result['status'] === 'COMPLETED') {
-                // Markiere die Rechnung als bezahlt
-                $invoice->update([
-                    'status' => 'paid',
-                    'paid_at' => now()
-                ]);
-
-                Log::info('Invoice paid successfully', [
-                    'invoice_id' => $invoice->id,
-                    'paypal_order_id' => $orderId
-                ]);
-
-                return redirect()->route('dashboard')->with('success', 
-                    'Rechnung ' . $invoice->number . ' wurde erfolgreich bezahlt!');
-            } else {
-                Log::error('PayPal payment capture failed for single invoice', [
-                    'result' => $result,
-                    'invoice_id' => $invoice->id
-                ]);
-                return redirect()->route('dashboard')->with('error', 
-                    'Die Zahlung für Rechnung ' . $invoice->number . ' konnte nicht durchgeführt werden.');
-            }
-        } catch (\Exception $e) {
-            Log::error('PayPal single payment error: ' . $e->getMessage());
-            return redirect()->route('dashboard')->with('error', 
-                'Die Zahlung für Rechnung ' . $invoice->number . ' konnte nicht durchgeführt werden.');
-        }
-    }
-    
-    // Abbruch-Callback für einzelne Rechnung
-    public function cancel(Invoice $invoice)
-    {
-        return redirect()->route('dashboard')->with('error', 
-            'Zahlung für Rechnung ' . $invoice->number . ' abgebrochen.');
     }
 
     // Abbruch-Callback für Bulk-Zahlungen
     public function bulkCancel()
     {
-        session()->forget(['paypal_invoices', 'paypal_bulk_payments']);
+        session()->forget(['paypal_invoices', 'paypal_order_id', 'paypal_total_amount']);
         return redirect()->route('dashboard')->with('error', 'Zahlung abgebrochen.');
     }
 }

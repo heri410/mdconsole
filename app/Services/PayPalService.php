@@ -42,12 +42,17 @@ class PayPalService {
      */
     public function createPayment($invoice)
     {
+        // Validierung: Betrag muss größer als 0 sein
+        if (!$invoice->total || $invoice->total <= 0) {
+            throw new \InvalidArgumentException('Der Rechnungsbetrag muss größer als 0 sein. Aktueller Betrag: ' . $invoice->total);
+        }
+        
         $order = [
             'intent' => 'CAPTURE',
             'purchase_units' => [[
                 'amount' => [
                     'currency_code' => 'EUR',
-                    'value' => $invoice->total
+                    'value' => number_format($invoice->total, 2, '.', '')
                 ],
                 'description' => 'Rechnung Nr. ' . $invoice->number
             ]],
@@ -79,59 +84,105 @@ class PayPalService {
     }
 
     /**
-     * Erstellt Bulk-Zahlungen für mehrere Rechnungen
+     * Erstellt eine kombinierte PayPal-Zahlung für mehrere Rechnungen
      */
     public function createBulkPayment($invoices)
     {
         try {
             $this->provider->getAccessToken();
-            $approvalUrls = [];
-            $paymentResults = [];
-
+            
+            // Berechne den Gesamtbetrag aller Rechnungen
+            $totalAmount = 0;
+            $validInvoices = [];
+            $invalidInvoices = [];
+            
             foreach ($invoices as $invoice) {
-                $order = [
-                    'intent' => 'CAPTURE',
-                    'purchase_units' => [[
-                        'amount' => [
-                            'currency_code' => config('paypal.currency', 'EUR'),
-                            'value' => $invoice->total
-                        ],
-                        'description' => 'Rechnung Nr. ' . $invoice->number,
-                        'invoice_id' => $invoice->id
-                    ]],
-                    'application_context' => [
-                        'return_url' => route('paypal.bulk.success'),
-                        'cancel_url' => route('paypal.bulk.cancel')
-                    ]
-                ];
-
-                $response = $this->provider->createOrder($order);
+                // Validierung: Betrag muss größer als 0 sein
+                if (!$invoice->total || $invoice->total <= 0) {
+                    $invalidInvoices[] = [
+                        'invoice_id' => $invoice->id,
+                        'order_id' => null,
+                        'status' => 'failed',
+                        'error' => [
+                            'name' => 'INVALID_AMOUNT',
+                            'message' => 'Der Rechnungsbetrag muss größer als 0 sein. Aktueller Betrag: ' . $invoice->total
+                        ]
+                    ];
+                    continue;
+                }
                 
+                $totalAmount += $invoice->total;
+                $validInvoices[] = $invoice;
+            }
+            
+            if (empty($validInvoices)) {
+                return [
+                    'success' => false,
+                    'approval_urls' => [],
+                    'payment_results' => $invalidInvoices,
+                    'error' => ['message' => 'Keine gültigen Rechnungen für die Zahlung gefunden.']
+                ];
+            }
+            
+            // Erstelle eine einzelne PayPal-Bestellung für alle Rechnungen
+            $invoiceNumbers = collect($validInvoices)->pluck('number')->implode(', ');
+            $description = 'Sammlung für Rechnungen: ' . $invoiceNumbers;
+            
+            $order = [
+                'intent' => 'CAPTURE',
+                'purchase_units' => [[
+                    'amount' => [
+                        'currency_code' => config('paypal.currency', 'EUR'),
+                        'value' => number_format($totalAmount, 2, '.', '')
+                    ],
+                    'description' => $description,
+                    'custom_id' => 'bulk_' . collect($validInvoices)->pluck('id')->implode('_')
+                ]],
+                'application_context' => [
+                    'return_url' => route('paypal.bulk.success'),
+                    'cancel_url' => route('paypal.bulk.cancel')
+                ]
+            ];
+
+            $response = $this->provider->createOrder($order);
+            
+            if (isset($response['id'])) {
+                // Suche nach der Approval-URL
+                $approvalUrl = null;
                 if (isset($response['links'])) {
                     foreach ($response['links'] as $link) {
                         if ($link['rel'] === 'approve') {
-                            $approvalUrls[] = [
-                                'invoice_id' => $invoice->id,
-                                'order_id' => $response['id'],
-                                'approval_url' => $link['href']
-                            ];
+                            $approvalUrl = $link['href'];
                             break;
                         }
                     }
                 }
-
-                $paymentResults[] = [
-                    'invoice_id' => $invoice->id,
-                    'order_id' => $response['id'] ?? null,
-                    'status' => isset($response['id']) ? 'created' : 'failed',
-                    'error' => isset($response['error']) ? $response['error'] : null
+                
+                $paymentResults = [];
+                foreach ($validInvoices as $invoice) {
+                    $paymentResults[] = [
+                        'invoice_id' => $invoice->id,
+                        'order_id' => $response['id'],
+                        'status' => 'created',
+                        'error' => null
+                    ];
+                }
+                
+                // Füge ungültige Rechnungen hinzu
+                $paymentResults = array_merge($paymentResults, $invalidInvoices);
+                
+                return [
+                    'success' => true,
+                    'approval_url' => $approvalUrl,
+                    'order_id' => $response['id'],
+                    'payment_results' => $paymentResults,
+                    'total_amount' => $totalAmount
                 ];
             }
-
+            
             return [
-                'success' => !empty($approvalUrls),
-                'approval_urls' => $approvalUrls,
-                'payment_results' => $paymentResults
+                'success' => false,
+                'error' => $response['error'] ?? ['message' => 'Unbekannter Fehler beim Erstellen der PayPal-Bestellung']
             ];
 
         } catch (\Exception $e) {
@@ -139,6 +190,19 @@ class PayPalService {
                 'success' => false,
                 'error' => ['message' => $e->getMessage()]
             ];
+        }
+    }
+
+    /**
+     * Capture eine bereits genehmigte PayPal-Zahlung
+     */
+    public function capturePayment($orderId)
+    {
+        try {
+            $this->provider->getAccessToken();
+            return $this->provider->capturePaymentOrder($orderId);
+        } catch (\Exception $e) {
+            throw new \Exception('PayPal Capture Fehler: ' . $e->getMessage());
         }
     }
 }
