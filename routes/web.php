@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DomainController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,6 +24,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Domain management (only for customers)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/domains', [DomainController::class, 'index'])->name('domains.index');
+    Route::get('/domains/{domain}', [DomainController::class, 'show'])->name('domains.show');
+});
+
+// Legal pages
+Route::view('/legal/impressum', 'legal.impressum')->name('legal.impressum');
+Route::view('/legal/privacy', 'legal.privacy')->name('legal.privacy');
 
 require __DIR__.'/auth.php';
 
