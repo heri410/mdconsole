@@ -20,6 +20,7 @@ class Customer extends Model
         'zip',
         'city',
         'country',
+        'billing_day',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -152,5 +153,29 @@ class Customer extends Model
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+    
+    /**
+     * Get the positions for the customer.
+     */
+    public function positions()
+    {
+        return $this->hasMany(Position::class);
+    }
+    
+    /**
+     * Get unbilled positions for the customer.
+     */
+    public function unbilledPositions()
+    {
+        return $this->hasMany(Position::class)->where('billed', false);
+    }
+    
+    /**
+     * Get billing day for this customer (default: 1st of month).
+     */
+    public function getBillingDayAttribute($value): int
+    {
+        return $value ?? 1;
     }
 }

@@ -9,19 +9,26 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <nav class="navbar navbar-dark bg-dark border-bottom mb-4">
         <div class="container">
-            <a class="navbar-brand" href="#">{{ config('app.name', 'Rechnungsportal') }}</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">{{ __('ui.dashboard') }}</a>
-                    </li>
-                    <!-- Weitere Navigationspunkte nach Bedarf -->
-                </ul>
+            <a class="navbar-brand" href="{{ route('dashboard') }}">{{ config('app.name', 'Rechnungsportal') }}</a>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown">
+                        Admin
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
+                        <li><a class="dropdown-item" href="{{ route('positions.index') }}">Positionen verwalten</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                @csrf
+                                <button type="submit" class="dropdown-item">Abmelden</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -49,7 +56,12 @@
                             <h3 class="mb-0">{{ __('ui.your_invoices') }}</h3>
                             <div class="d-flex align-items-center gap-3">
                                 @php
-                                    $openInvoices = $invoices->where('status', 'open')->count();
+                                    $openInvoices = 0;
+                                    foreach($invoices as $invoice) {
+                                        if($invoice->status === 'open') {
+                                            $openInvoices++;
+                                        }
+                                    }
                                 @endphp
                                 @if($openInvoices > 0)
                                     <form action="{{ route('paypal.bulk.pay') }}" method="POST" class="d-inline">

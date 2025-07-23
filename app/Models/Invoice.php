@@ -88,4 +88,12 @@ class Invoice extends Model
     {
         return $this->total_amount;
     }
+    
+    /**
+     * Get the positions that were billed in this invoice.
+     */
+    public function positions()
+    {
+        return $this->hasMany(Position::class);
+    }
 }
