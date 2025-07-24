@@ -20,3 +20,70 @@
 .login-card {
     @apply bg-black/80 backdrop-blur-md shadow-2xl border border-white/10 rounded-2xl;
 }
+
+/* Dashboard Card Styles */
+.border-left-primary {
+    border-left: 4px solid var(--bs-primary) !important;
+}
+
+.border-left-success {
+    border-left: 4px solid var(--bs-success) !important;
+}
+
+.border-left-warning {
+    border-left: 4px solid var(--bs-warning) !important;
+}
+
+.border-left-danger {
+    border-left: 4px solid var(--bs-danger) !important;
+}
+
+.border-left-info {
+    border-left: 4px solid var(--bs-info) !important;
+}
+
+/* Text color utilities for dashboard */
+.text-gray-800 {
+    color: var(--bs-body-color) !important;
+}
+
+.text-gray-300 {
+    color: var(--bs-secondary-color) !important;
+}
+
+/* Dark mode improvements */
+[data-bs-theme="dark"] .card {
+    background-color: var(--bs-dark) !important;
+    border-color: var(--bs-border-color) !important;
+}
+
+[data-bs-theme="dark"] .table {
+    --bs-table-bg: var(--bs-dark);
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.075);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .sidebar {
+        position: static !important;
+    }
+    
+    .sidebar.collapse:not(.show) {
+        display: none !important;
+    }
+}
+
+/* Theme transition */
+html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Footer improvements */
+.footer-nav a {
+    transition: color 0.2s ease;
+}
+
+.footer-nav a:hover {
+    color: var(--bs-primary) !important;
+}

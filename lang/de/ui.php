@@ -76,5 +76,54 @@ return [
     'profile' => 'Profil',
     'logout' => 'Abmelden',
     'you_are_logged_in' => 'Sie sind angemeldet!',
+    
+    // Dashboard Statistics
+    'total_invoices' => 'Rechnungen gesamt',
+    'open_invoices' => 'Offene Rechnungen',
+    'paid_invoices' => 'Bezahlte Rechnungen',
+    'total_amount' => 'Gesamtbetrag',
+    'invoices' => 'Rechnungen',
+    'pay_all_open' => 'Alle offenen bezahlen',
+    'pay_all_open_text' => 'Sie haben :count offene Rechnungen, die zusammen bezahlt werden können.',
+    
+    // Navigation
+    'my_domains' => 'Meine Domains',
+    'manage_positions' => 'Positionen verwalten',
+    
+    // Filters and Search
+    'filter' => 'Filter',
+    'all_statuses' => 'Alle Status',
+    'active' => 'Aktiv',
+    'inactive' => 'Inaktiv',
+    'expired' => 'Abgelaufen',
+    'search' => 'Suchen',
+    'expiring_soon' => 'Läuft bald ab',
+    'expiring_soon_only' => 'Nur bald ablaufende',
+    'all_customers' => 'Alle Kunden',
+    'customer' => 'Kunde',
+    'all' => 'Alle',
+    'not_billed' => 'Nicht abgerechnet',
+    'billed' => 'Abgerechnet',
+    'new_position' => 'Neue Position',
+    'reset' => 'Zurücksetzen',
+    
+    // Domains
+    'total_domains' => 'Domains gesamt',
+    'active_domains' => 'Aktive Domains',
+    'domains' => 'Domains',
+    'domain' => 'Domain',
+    'tld' => 'TLD',
+    'register_date' => 'Registrierungsdatum',
+    'provider' => 'Anbieter',
+    'days_overdue' => 'Tage überfällig',
+    'expires_today' => 'Läuft heute ab',
+    'days_left' => 'Tage verbleibend',
+    'view_details' => 'Details anzeigen',
+    'details' => 'Details',
+    'no_domains' => 'Keine Domains gefunden',
+    'no_domains_text' => 'Sie haben derzeit keine Domains registriert.',
+    
+    // Invoice Status
+    'paidoff' => 'Bezahlt',
 
 ];
