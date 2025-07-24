@@ -1,9 +1,9 @@
 
 @extends('layouts.app')
-@section('title', __('ui.dashboard', 'Dashboard'))
+@section('title', __('ui.dashboard'))
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">{{ __('ui.dashboard', 'Dashboard') }}</h1>
+        <h1 class="h2">{{ __('ui.dashboard') }}</h1>
     </div>
     
     @php $openInvoices = $invoices->where('status', 'open')->count(); @endphp
@@ -16,7 +16,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                {{ __('ui.total_invoices', 'Total Invoices') }}
+                                {{ __('ui.total_invoices') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $invoices->total() }}</div>
                         </div>
@@ -34,7 +34,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                {{ __('ui.open_invoices', 'Open Invoices') }}
+                                {{ __('ui.open_invoices') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $openInvoices }}</div>
                         </div>
@@ -52,7 +52,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                {{ __('ui.paid_invoices', 'Paid Invoices') }}
+                                {{ __('ui.paid_invoices') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $invoices->where('status', 'paidoff')->count() }}</div>
                         </div>
@@ -70,7 +70,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                {{ __('ui.total_amount', 'Total Amount') }}
+                                {{ __('ui.total_amount') }}
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 {{ number_format($invoices->sum('total_amount'), 2, ',', '.') }} €
@@ -91,14 +91,14 @@
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h5 class="card-title mb-1">{{ __('ui.open_invoices', 'Open Invoices') }}</h5>
-                        <p class="card-text text-muted">{{ __('ui.pay_all_open_text', 'You have :count open invoices that can be paid together.', ['count' => $openInvoices]) }}</p>
+                        <h5 class="card-title mb-1">{{ __('ui.open_invoices') }}</h5>
+                        <p class="card-text text-muted">{{ __('ui.pay_all_open_text', ['count' => $openInvoices]) }}</p>
                     </div>
                     <form action="{{ route('paypal.bulk.pay') }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-warning btn-lg">
                             <i class="bi bi-credit-card me-2"></i>
-                            {{ __('ui.pay_all_open', 'Pay All Open') }} ({{ $openInvoices }})
+                            {{ __('ui.pay_all_open') }} ({{ $openInvoices }})
                         </button>
                     </form>
                 </div>
@@ -109,7 +109,7 @@
     <!-- Invoices Table -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">{{ __('ui.invoices', 'Invoices') }}</h6>
+            <h6 class="m-0 font-weight-bold text-primary">{{ __('ui.invoices') }}</h6>
         </div>
         <div class="card-body">
             @if($invoices->count() > 0)
@@ -117,12 +117,12 @@
                     <table class="table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th>{{ __('ui.invoice_number', 'Invoice Number') }}</th>
-                                <th>{{ __('ui.date', 'Date') }}</th>
-                                <th>{{ __('ui.due_date', 'Due Date') }}</th>
-                                <th>{{ __('ui.amount', 'Amount') }}</th>
-                                <th>{{ __('ui.status', 'Status') }}</th>
-                                <th>{{ __('ui.actions', 'Actions') }}</th>
+                                <th>{{ __('ui.invoice_number') }}</th>
+                                <th>{{ __('ui.date') }}</th>
+                                <th>{{ __('ui.due_date') }}</th>
+                                <th>{{ __('ui.amount') }}</th>
+                                <th>{{ __('ui.status') }}</th>
+                                <th>{{ __('ui.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -134,7 +134,7 @@
                                         'overdue' => 'badge bg-danger',
                                         default => 'badge bg-secondary'
                                     };
-                                    $statusText = __('ui.' . $invoice->status, ucfirst($invoice->status));
+                                    $statusText = __('ui.' . $invoice->status);
                                 @endphp
                                 <tr>
                                     <td>
@@ -148,9 +148,9 @@
                                     <td><span class="{{ $badgeClass }}">{{ $statusText }}</span></td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="{{ route('invoice.download', $invoice->id) }}" class="btn btn-sm btn-outline-primary" title="{{ __('ui.download_pdf', 'Download PDF') }}">
+                                            <a href="{{ route('invoice.download', $invoice->id) }}" class="btn btn-sm btn-outline-primary" title="{{ __('ui.download_pdf') }}">
                                                 <i class="bi bi-download"></i>
-                                                <span class="d-none d-lg-inline ms-1">{{ __('ui.download_pdf', 'Download PDF') }}</span>
+                                                <span class="d-none d-lg-inline ms-1">{{ __('ui.download_pdf') }}</span>
                                             </a>
                                         </div>
                                     </td>
@@ -166,8 +166,8 @@
             @else
                 <div class="text-center py-5">
                     <i class="bi bi-receipt text-muted" style="font-size: 4rem;"></i>
-                    <h4 class="mt-3">{{ __('ui.no_invoices', 'No Invoices') }}</h4>
-                    <p class="text-muted">{{ __('ui.no_invoices_text', 'You have no invoices at the moment.') }}</p>
+                    <h4 class="mt-3">{{ __('ui.no_invoices') }}</h4>
+                    <p class="text-muted">{{ __('ui.no_invoices_text') }}</p>
                 </div>
             @endif
         </div>

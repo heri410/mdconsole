@@ -17,12 +17,12 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-small shadow" aria-labelledby="userMenuMobile">
                 <li><h6 class="dropdown-header">{{ Auth::user()->name }}</h6></li>
-                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>{{ __('ui.profile', 'Profile') }}</a></li>
+                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>{{ __('ui.profile') }}</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>{{ __('ui.logout', 'Logout') }}</button>
+                        <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>{{ __('ui.logout') }}</button>
                     </form>
                 </li>
             </ul>
@@ -39,12 +39,12 @@
                 <i class="bi bi-person-circle me-2"></i>{{ Auth::user()->name }}
             </a>
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-small shadow" aria-labelledby="userMenu">
-                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>{{ __('ui.profile', 'Profile') }}</a></li>
+                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>{{ __('ui.profile') }}</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>{{ __('ui.logout', 'Logout') }}</button>
+                        <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>{{ __('ui.logout') }}</button>
                     </form>
                 </li>
             </ul>

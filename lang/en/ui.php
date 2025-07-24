@@ -75,5 +75,54 @@ return [
     'profile' => 'Profile',
     'logout' => 'Log Out',
     'you_are_logged_in' => 'You\'re logged in!',
+    
+    // Dashboard Statistics
+    'total_invoices' => 'Total Invoices',
+    'open_invoices' => 'Open Invoices',
+    'paid_invoices' => 'Paid Invoices',
+    'total_amount' => 'Total Amount',
+    'invoices' => 'Invoices',
+    'pay_all_open' => 'Pay All Open',
+    'pay_all_open_text' => 'You have :count open invoices that can be paid together.',
+    
+    // Navigation
+    'my_domains' => 'My Domains',
+    'manage_positions' => 'Manage Positions',
+    
+    // Filters and Search
+    'filter' => 'Filter',
+    'all_statuses' => 'All Statuses',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'expired' => 'Expired',
+    'search' => 'Search',
+    'expiring_soon' => 'Expiring Soon',
+    'expiring_soon_only' => 'Expiring Soon Only',
+    'all_customers' => 'All Customers',
+    'customer' => 'Customer',
+    'all' => 'All',
+    'not_billed' => 'Not Billed',
+    'billed' => 'Billed',
+    'new_position' => 'New Position',
+    'reset' => 'Reset',
+    
+    // Domains
+    'total_domains' => 'Total Domains',
+    'active_domains' => 'Active Domains',
+    'domains' => 'Domains',
+    'domain' => 'Domain',
+    'tld' => 'TLD',
+    'register_date' => 'Register Date',
+    'provider' => 'Provider',
+    'days_overdue' => 'days overdue',
+    'expires_today' => 'Expires today',
+    'days_left' => 'days left',
+    'view_details' => 'View Details',
+    'details' => 'Details',
+    'no_domains' => 'No Domains Found',
+    'no_domains_text' => 'You currently have no domains registered.',
+    
+    // Invoice Status
+    'paidoff' => 'Paid',
 
 ];
