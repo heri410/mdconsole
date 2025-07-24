@@ -124,7 +124,7 @@
                 </div>
                 
                 <div class="mt-3">
-                    {{ $positions->appends(request()->query())->links('custom.pagination') }}
+                    {{ $positions->appends(request()->query())->links('pagination::bootstrap-4') }}
                 </div>
             @else
                 <div class="text-center py-5">
